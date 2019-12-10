@@ -1,0 +1,22 @@
+#!/bin/bash
+while getopts ":b:t" opt; do
+    case $opt in
+        b)
+            pid=$(ps -C kc-build -o pid h)
+			echo 1 ... $pid
+            ;;
+        t)
+            pid=$(ps -C kc-tests -o pid h)
+			echo 2 ... $pid
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+			exit 1
+            ;;
+    esac
+done
+if [ ${pid}x == 'x' ] ; then
+	pid=$USER
+fi
+
+echo pstree ${pid} -aTl
