@@ -1,7 +1,37 @@
 #!/bin/bash
-set -o errexit
-mvn clean install -DskipTests
-mvn clean install -f distribution/pom.xml
-mvn clean install -f testsuite/integration-arquillian/servers/pom.xml
-mvn clean install -f testsuite/integration-arquillian/test-apps/pom.xml
+
+PRODUCT_BUILD_PARAMS=""
+
+while getopts "pe" opt; do
+        case $opt in
+        	p)
+                        # build product
+                        PROD=$opt
+			echo "Starting product build"
+                        PRODUCT_BUILD_PARAMS="-Dproduct -Dinsecure.repositories=WARN"
+                        ;;
+                e)
+                        # set interruption
+                        INT=$opt
+			echo set -o errexit
+                        ;;
+		t)
+			# test arifacts
+			TA=$opt
+			echo "Test artifacts"
+			;;
+                \?)
+                        echo "Invalid option: -$OPTARG" >&2
+			exit
+                        ;;
+        esac
+done
+
+
+mvn clean install -DskipTests $PRODUCT_BUILD_PARAMS
+mvn clean install -f distribution/pom.xml $PRODUCT_BUILD_PARAMS
+if [ ${INT}x != x ] ; then
+	mvn clean install -f testsuite/integration-arquillian/servers/pom.xml $PRODUCT_BUILD_PARAMS
+	mvn clean install -f testsuite/integration-arquillian/test-apps/pom.xml $PRODUCT_BUILD_PARAMS
+fi
 
