@@ -1,0 +1,6 @@
+#!/bin/bash
+
+IP_ADDR=$(podman inspect --format '{{ .NetworkSettings.IPAddress }}' kc-dev-mysql)
+
+./bin/standalone.sh -Dkeycloak.db.host=${IP_ADDR:-localhost}
+
