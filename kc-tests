@@ -2,7 +2,7 @@
 
 while getopts "d:ft:j:csbw" opt; do
 	case $opt in
-    	d)
+    		d)
 			# possible container names: mysql|postgres|mssql2017|mariadb
 			OPT=$opt
 			container_name=$OPTARG
