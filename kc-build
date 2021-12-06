@@ -3,8 +3,13 @@ set -o errexit
 
 PRODUCT_BUILD_PARAMS=""
 
-while getopts "pdt" opt; do
+while getopts "pdtxj:" opt; do
         case $opt in
+		x)
+			# debug
+			echo "Maven debug mode"
+			DEBUG="--debug"
+			;;
         	p)
                         # build product
                         PROD=$opt
@@ -21,23 +26,25 @@ while getopts "pdt" opt; do
 			TA=$opt
 			echo "Test artifacts build"
 			;;
-                \?)
+                j)
+                        # set JAVA_HOME
+                        source kc-java-selector ${OPTARG}
+                        ;;
+   		\?)
                         echo "Invalid option: -$OPTARG" >&2
 			exit
                         ;;
         esac
 done
 
-
-mvn clean install -DskipTests $PRODUCT_BUILD_PARAMS
 if [ ${DIST}x == x ] ; then
-	mvn clean install -DskipTests $PRODUCT_BUILD_PARAMS
-	mvn clean install -f distribution/pom.xml $PRODUCT_BUILD_PARAMS
+	mvn $DEBUG clean install -DskipTests $PRODUCT_BUILD_PARAMS
+	mvn $DEBUG clean install -f distribution/pom.xml $PRODUCT_BUILD_PARAMS
 else
-	mvn clean install -f distribution/pom.xml $PRODUCT_BUILD_PARAMS
+	mvn $DEBUG clean install -f distribution/pom.xml $PRODUCT_BUILD_PARAMS
 fi
 if [ ${TA}x != x ] ; then
-	mvn clean install -f testsuite/integration-arquillian/servers/pom.xml $PRODUCT_BUILD_PARAMS
-	mvn clean install -f testsuite/integration-arquillian/test-apps/pom.xml $PRODUCT_BUILD_PARAMS
+	mvn $DEBUG clean install -f testsuite/integration-arquillian/servers/pom.xml $PRODUCT_BUILD_PARAMS
+	mvn $DEBUG clean install -f testsuite/integration-arquillian/test-apps/pom.xml $PRODUCT_BUILD_PARAMS
 fi
 

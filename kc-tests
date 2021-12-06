@@ -1,6 +1,8 @@
 #!/bin/bash
 
-while getopts "d:ft:j:csbw" opt; do
+MVN_ARGS="-fae"
+
+while getopts "d:ft:j:csbwm:" opt; do
 	case $opt in
     		d)
 			# possible container names: mysql|postgres|mssql2017|mariadb
@@ -22,7 +24,7 @@ while getopts "d:ft:j:csbw" opt; do
 			TEST="-Dtest=$OPTARG"
 			;;		
 		j)
-			# JAVA_HOME
+			# set JAVA_HOME
 			source kc-java-selector ${OPTARG}
 			;;
 
@@ -46,6 +48,10 @@ while getopts "d:ft:j:csbw" opt; do
 			# auth-server setup (default is undertow)
 			AUTH_SERVER_PROFILE="-Pauth-server-wildfly"
 			;;
+		m)
+			# maven args
+			MVN_ARGS="${OPTARG} ${MVN_ARGS}"
+			;;
 		\?)
 			echo "Invalid option: -$OPTARG" >&2
 			;;
@@ -54,7 +60,7 @@ done
 
 if [ ${OPT} == 'f' ] ; then
 	echo "Default tests"
-	mvn -fae -f testsuite/integration-arquillian/pom.xml clean install \
+	mvn ${MVN_ARGS} -f testsuite/integration-arquillian/pom.xml clean install \
 	${AUTH_SERVER_PROFILE} \
 	-Dauth.server.memory.settings="-Xms128m -Xmx1024m -XX:MetaspaceSize=96m -XX:MaxMetaspaceSize=1024m" \
 	-Dapp.server.memory.settings="-Xms128m -Xmx512m -XX:MetaspaceSize=96m -XX:MaxMetaspaceSize=256m" \
@@ -86,7 +92,7 @@ elif [ ${container_name}x != x ] ; then
 		sudo podman run --name mariadb --publish 3306:3306 --env MARIADB_ROOT_PASSWORD=keycloak --env MARIADB_DATABASE=keycloak --env MARIADB_USER=keycloak --env MARIADB_PASSWORD=keycloak --detach mariadb/server:10.1
 		IP_ADDR=$(sudo podman inspect --format '{{ .NetworkSettings.IPAddress }}' mariadb)
 
-		mvn -f testsuite/integration-arquillian/pom.xml clean install -Pjpa,auth-server-wildfly,db-mariadb,auth-server-migration -Dsurefire.memory.Xms=512m -Dsurefire.memory.Xmx=1536m -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dtest=MigrationTest -Dmigration.mode=manual -Dmigrated.auth.server.version=4.8.3.Final -Dprevious.product.unpacked.folder.name=keycloak-4.8.3.Final -Dmigration.import.file.name=migration-realm-4.8.3.Final.json -Dauth.server.ssl.required=false \
+		mvn ${MVN_ARGS} -f testsuite/integration-arquillian/pom.xml clean install -Pjpa,auth-server-wildfly,db-mariadb,auth-server-migration -Dsurefire.memory.Xms=512m -Dsurefire.memory.Xmx=1536m -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Dtest=MigrationTest -Dmigration.mode=manual -Dmigrated.auth.server.version=4.8.3.Final -Dprevious.product.unpacked.folder.name=keycloak-4.8.3.Final -Dmigration.import.file.name=migration-realm-4.8.3.Final.json -Dauth.server.ssl.required=false \
 		-Dmaven.test.failure.ignore=false \
 		-Djdbc.mvn.version.legacy=2.0.3 \
 		-Djdbc.mvn.groupId=org.mariadb.jdbc \
@@ -100,7 +106,7 @@ elif [ ${container_name}x != x ] ; then
 		-Dkeycloak.connectionsJpa.password=keycloak \
 	    $JS_BROWER_TIMEOUT $CLIENT_DEBUG $SERVER_DEBUG $TEST
 	else
-		mvn clean install -f testsuite/integration-arquillian/pom.xml \
+		mvn ${MVN_ARGS} clean install -f testsuite/integration-arquillian/pom.xml \
 		-Pjpa,clean-jpa,auth-server-migration,test-73-migration,migration-manual \
 		-Dauth.server.db.host=${IP_ADDR:-localhost} \
 		-Ddocker.database.skip=true \

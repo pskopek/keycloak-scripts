@@ -5,6 +5,8 @@ if [ ${1} == 'openjdk-8' ] ; then
 	export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
 elif [ ${1} == 'openjdk-11' ] ; then
     export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+elif [ ${1} == 'adoptopenjdk-openj9-11' ] ; then
+    export JAVA_HOME=/usr/lib/jvm/adoptopenjdk-11-openj9
 elif [ ${1} == 'openjdk-openj9-11' ] ; then
     export JAVA_HOME=/opt/jvm/openjdk-openj9-11
 elif [ ${1} == 'jdk-8' ] ; then
