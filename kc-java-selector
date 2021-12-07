@@ -15,6 +15,8 @@ elif [ ${1} == 'jdk-11' ] ; then
     export JAVA_HOME=/opt/jvm/jdk-11
 elif [ ${1} == 'ibm-8' ] ; then
     export JAVA_HOME=/opt/jvm/ibm-8
+elif [ ${1} == 'openjdk-17' ] ; then
+	export JAVA_HOME=$(ls -d /usr/lib/jvm/java-17-openjdk*)
 else
     echo "JAVA_HOME not specified or recognized: -$OPTARG" >&2
 fi
