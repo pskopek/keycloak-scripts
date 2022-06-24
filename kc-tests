@@ -1,6 +1,8 @@
 #!/bin/bash
 
 MVN_ARGS="-fae"
+# fix test SSL issues on new Fedora release
+export OPENSSL_CONF="/etc/ssl/"
 
 while getopts "d:ft:j:csbwm:" opt; do
 	case $opt in
