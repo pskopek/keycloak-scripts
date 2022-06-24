@@ -14,7 +14,7 @@ while getopts "pdtxj:" opt; do
                         # build product
                         PROD=$opt
 			echo "Product build"
-                        PRODUCT_BUILD_PARAMS="-Dproduct -Dinsecure.repositories=WARN"
+                        PRODUCT_BUILD_PARAMS="-Dproduct -Dinsecure.repositories=WARN -DskipTestsuite -DskipTests"
                         ;;
 		d)
 			# just distribution
@@ -30,6 +30,11 @@ while getopts "pdtxj:" opt; do
                         # set JAVA_HOME
                         source kc-java-selector ${OPTARG}
                         ;;
+		s)
+			# skip testsuite build
+			TS_SKIP="-DskipTestsuite"
+			echo "Skip TestSuite build"
+			;;
    		\?)
                         echo "Invalid option: -$OPTARG" >&2
 			exit
@@ -38,12 +43,13 @@ while getopts "pdtxj:" opt; do
 done
 
 if [ ${DIST}x == x ] ; then
-	mvn $DEBUG clean install -DskipTests $PRODUCT_BUILD_PARAMS
+	mvn $DEBUG clean install -DskipTests $TS_SKIP $PRODUCT_BUILD_PARAMS
 	mvn $DEBUG clean install -f distribution/pom.xml $PRODUCT_BUILD_PARAMS
 else
 	mvn $DEBUG clean install -f distribution/pom.xml $PRODUCT_BUILD_PARAMS
 fi
 if [ ${TA}x != x ] ; then
+	mvn $DEBUG clean install -f testsuite/pom.xml -DskipTests $PRODUCT_BUILD_PARAMS
 	mvn $DEBUG clean install -f testsuite/integration-arquillian/servers/pom.xml $PRODUCT_BUILD_PARAMS
 	mvn $DEBUG clean install -f testsuite/integration-arquillian/test-apps/pom.xml $PRODUCT_BUILD_PARAMS
 fi
